@@ -9,7 +9,16 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/votre-repo/student-management.git'
+                // UTILISEZ VOTRE VRAI REPOSITORY ICI
+                git branch: 'main', 
+                url: 'https://github.com/ayedoumayma/oumayma_ayed_4sim3.git',
+                credentialsId: 'dae9c1dd-f025-4134-9f2a-b18869ab4eaa'
+            }
+        }
+        
+        stage('Build JAR') {
+            steps {
+                sh 'mvn clean package -DskipTests'
             }
         }
         
