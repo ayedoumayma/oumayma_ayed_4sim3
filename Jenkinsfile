@@ -4,12 +4,12 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'votre-username/student-management'
         DOCKER_TAG = 'latest'
+        MAVEN_OPTS = '-Dmaven.wagon.http.retryHandler.count=3 -Dmaven.wagon.httpconnectionManager.ttlSeconds=120'
     }
     
     stages {
         stage('Checkout') {
             steps {
-                // UTILISEZ VOTRE VRAI REPOSITORY ICI
                 git branch: 'main', 
                 url: 'https://github.com/ayedoumayma/oumayma_ayed_4sim3.git',
                 credentialsId: 'dae9c1dd-f025-4134-9f2a-b18869ab4eaa'
@@ -18,7 +18,8 @@ pipeline {
         
         stage('Build JAR') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                // Ajoutez des options pour les timeouts
+                sh 'mvn clean package -DskipTests -Dmaven.wagon.http.readTimeout=300000 -Dmaven.wagon.http.connectionTimeout=300000'
             }
         }
         
@@ -38,15 +39,6 @@ pipeline {
                     }
                 }
             }
-        }
-    }
-    
-    post {
-        success {
-            echo 'Docker image built and pushed successfully to Docker Hub!'
-        }
-        failure {
-            echo 'Pipeline failed! Check the logs for details.'
         }
     }
 }
