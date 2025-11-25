@@ -2,16 +2,14 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_IMAGE = 'votredockerhub/student-management'
+        DOCKER_IMAGE = 'votredockerhub/student-management'  // REMPLACEZ par votre username Docker Hub
         DOCKER_TAG = 'latest'
     }
     
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', 
-                url: 'https://github.com/ayedoumayma/oumayma_ayed_4sim3.git',
-                credentialsId: 'dae9c1dd-f025-4134-9f2a-b18869ab4eaa'
+                checkout scm  // Cela utilise déjà votre configuration SCM
             }
         }
         
@@ -26,6 +24,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    echo "Building Docker image: ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
                     docker.build("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}")
                 }
             }
@@ -34,9 +33,11 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                    echo "Pushing Docker image to Docker Hub..."
+                    docker.withRegistry('', 'docker-hub-credentials') {
                         docker.image("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}").push()
                     }
+                    echo "✅ Docker image pushed successfully!"
                 }
             }
         }
@@ -44,14 +45,11 @@ pipeline {
     
     post {
         success {
-            echo '✅ Docker image built and pushed successfully to Docker Hub!'
-            echo "Image: ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
+            echo '✅ Pipeline completed successfully!'
+            echo "Docker image: ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
         }
         failure {
-            echo '❌ Pipeline failed! Check the logs for details.'
-        }
-        always {
-            echo 'Pipeline execution completed.'
+            echo '❌ Pipeline failed! Check the logs.'
         }
     }
 }
