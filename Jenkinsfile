@@ -2,9 +2,8 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_IMAGE = 'votre-username/student-management'
+        DOCKER_IMAGE = 'votredockerhub/student-management'
         DOCKER_TAG = 'latest'
-        MAVEN_OPTS = '-Dmaven.wagon.http.retryHandler.count=3 -Dmaven.wagon.httpconnectionManager.ttlSeconds=120'
     }
     
     stages {
@@ -18,15 +17,16 @@ pipeline {
         
         stage('Build JAR') {
             steps {
-                // Ajoutez des options pour les timeouts
-                sh 'mvn clean package -DskipTests -Dmaven.wagon.http.readTimeout=300000 -Dmaven.wagon.http.connectionTimeout=300000'
+                timeout(time: 10, unit: 'MINUTES') {
+                    sh 'mvn clean package -DskipTests'
+                }
             }
         }
         
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
+                    docker.build("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}")
                 }
             }
         }
@@ -35,10 +35,23 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                        docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
+                        docker.image("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}").push()
                     }
                 }
             }
+        }
+    }
+    
+    post {
+        success {
+            echo '✅ Docker image built and pushed successfully to Docker Hub!'
+            echo "Image: ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
+        }
+        failure {
+            echo '❌ Pipeline failed! Check the logs for details.'
+        }
+        always {
+            echo 'Pipeline execution completed.'
         }
     }
 }
