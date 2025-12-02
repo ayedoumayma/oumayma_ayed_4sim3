@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_IMAGE = 'oumayma42/test'  // REMPLACEZ par votre username Docker Hub
+        DOCKER_IMAGE = 'oumayma42'  // REMPLACEZ par votre username Docker Hub
         DOCKER_TAG = 'latest'
     }
     
@@ -34,7 +34,7 @@ pipeline {
             steps {
                 script {
                     echo "Pushing Docker image to Docker Hub..."
-                    docker.withRegistry('', 'docker-hub-credentials') {
+                    docker.withRegistry('', 'docker-hub-oumayma') {
                         docker.image("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}").push()
                     }
                     echo "✅ Docker image pushed successfully!"
