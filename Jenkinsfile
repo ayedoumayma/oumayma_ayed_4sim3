@@ -20,7 +20,8 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-oumayma') {
+                    docker.withRegistry('', 'docker-hub-oumayma') {
+                        echo "Pushing image..."
                         docker.image("oumayma42/test:latest").push()
                     }
                 }
